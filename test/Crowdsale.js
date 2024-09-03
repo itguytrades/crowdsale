@@ -95,9 +95,33 @@ describe('Crowdsale', () => {
 	      it('updates user token balance', async () => {
 	        expect(await token.balanceOf(user1.address)).to.equal(amount)
 	      })
-
 	    })
     })
+
+	describe('Updating Price', () => {
+	    let transaction, result
+	    let price = ether(2)
+
+	    describe('Success', () => {
+
+	      beforeEach(async () => {
+	        transaction = await crowdsale.connect(deployer).setPrice(ether(2))
+	        result = await transaction.wait()
+	      })
+
+	      it('updates the price', async () => {
+	        expect(await crowdsale.price()).to.equal(ether(2))
+	      })
+
+    	})
+    	describe('Failure', () => {
+	      it('prevents non-owner from updating price', async () => {
+	        await expect(crowdsale.connect(user1).setPrice(price)).to.be.reverted
+	      })
+
+   		})
+	})
+
 	describe('Finalzing Sale', () => {
 	    let transaction, result
 	    let amount = tokens(10)
@@ -127,7 +151,6 @@ describe('Crowdsale', () => {
 	        await expect(transaction).to.emit(crowdsale, "Finalize")
 	          .withArgs(amount, value)
 	      })
-
 	    })
 
 	    describe('Failure', () => {
@@ -135,7 +158,6 @@ describe('Crowdsale', () => {
 	      it('prevents non-owner from finalizing', async () => {
 	        await expect(crowdsale.connect(user1).finalize()).to.be.reverted
 	      })
-
+   		})
     })
-  })
 })
