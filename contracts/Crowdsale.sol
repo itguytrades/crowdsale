@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "./Token.sol";
 
 contract Crowdsale {
+    address owner;
     Token public token;
     uint256 public price;
     uint256 public maxTokens;
@@ -16,6 +17,7 @@ contract Crowdsale {
         uint256 _price,
         uint256 _maxTokens
     ) {
+        owner = msg.sender;
         token = _token;
         price = _price;
         maxTokens = _maxTokens;
@@ -35,5 +37,15 @@ contract Crowdsale {
         tokenSold += _amount;
 
         emit Buy(_amount, msg.sender);
+    }
+       // Finalize Sale
+    function finalize() public onlyOwner {
+        require(token.transfer(owner, token.balanceOf(address(this))));
+
+        uint256 value = address(this).balance;
+        (bool sent, ) = owner.call{value: value}("");
+        require(sent);
+
+        emit Finalize(tokensSold, value);
     }
 }
