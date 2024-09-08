@@ -5,6 +5,8 @@ import { ethers } from 'ethers'
 
 import Navigation from './Navigation';
 import Info from './Info';
+import Loading from './Loading';
+import Progress from './Progress';
 
 import TOKEN_ABI from '../abis/Token.json';
 import CROWDSALE_ABI from '../abis/Crowdsale.json';
@@ -72,15 +74,20 @@ function App() {
 		<Container>
 			<Navigation />
 
+			<h1 className='my-4 text-center'>Introducing DApp Token!</h1>
+
 			{isLoading ? (
-				<p className="text-center">Loading....</p>
+				<Loading />
 				) : (
 
 
-
+			<>
 			<p className='text-center'><strong>Current Price:</strong> {price} ETH</p>
-				)}
+			<Progress maxTokens={maxTokens} tokenSold={tokenSold}/>
+			</>
 			
+				)}
+
 			<hr />
 			{account && (
 				<Info account={account} accountBalance={accountBalance} />
