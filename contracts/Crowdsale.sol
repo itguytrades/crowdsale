@@ -10,19 +10,46 @@ contract Crowdsale {
     uint256 public maxTokens;
     uint256 public tokenSold;
 
+    mapping(address => bool) public whitelist; 
+
+    uint256 public startTime;
+    uint256 public endTime;
+
+
+    uint256 public minPurchase;
+    uint256 public maxPurchase;
+
     event Buy(uint256 amount, address buyer);
     event Finalize(uint256 tokensSold, uint256 ethRaised);
 
     constructor(
         Token _token,
         uint256 _price,
-        uint256 _maxTokens
+        uint256 _maxTokens,
+        uint256 _startTime, 
+        uint256 _endTime, 
+        uint256 _minPurchase, 
+        uint256 _maxPurchase
     ) {
         owner = msg.sender;
         token = _token;
         price = _price;
         maxTokens = _maxTokens;
+        startTime = _startTime;
+        endTime = _endTime;
+        minPurchase = _minPurchase;
+        maxPurchase = _maxPurchase;
 
+    }
+
+    modifier isWhitelisted() {
+        require(whitelist[msg.sender], "Investor not Whitelisted");
+        _;
+    }
+
+    modifier crowdsaleStatus() {
+        require(block.timestamp >= startTime && block.timestamp <= endTime, "Crowdsale not active");
+        _;
     }
 
     modifier onlyOwner() {
@@ -35,12 +62,20 @@ contract Crowdsale {
         buyTokens(amount * 1e18);
     }
 
-    function buyTokens(uint256 _amount) public payable {
-        require(msg.value == (_amount / 1e18) * price);
-        require(token.balanceOf(address(this)) >= _amount);
-        require(token.transfer(msg.sender, _amount));
+    function addToWhitelist(address _investorAddress, bool _status) public onlyOwner {
+        whitelist[_investorAddress] = _status;
+    }
 
-        tokenSold += _amount;
+    function buyTokens(uint256 _amount) 
+        public
+        payable
+        isWhitelisted
+        crowdsaleStatus {
+            require(msg.value == (_amount / 1e18) * price);
+            require(token.balanceOf(address(this)) >= _amount);
+            require(token.transfer(msg.sender, _amount));
+
+            tokenSold += _amount;
 
         emit Buy(_amount, msg.sender);
     }
