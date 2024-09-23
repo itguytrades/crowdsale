@@ -11,7 +11,7 @@ describe('Crowdsale', () => {
   let crowdsale, token
   let accounts, deployer, user1
 
-  const minPurchase = ethers.utils.parseEther("0.1"); // Minimum purchase is 0.1 ETH
+  const minPurchase = ethers.utils.parseEther("2"); // Minimum purchase is 0.1 ETH
   const maxPurchase = ethers.utils.parseEther("10");  // Maximum purchase is 10 ETH
   let startTime, endTime;
 
@@ -105,14 +105,31 @@ describe('Crowdsale', () => {
 
 
     describe('Failure', () => {
+
+      beforeEach(async () => {
+
+        transaction = await crowdsale.connect(deployer).addToWhitelist(user1.address, true)
+        result = await transaction.wait()
+
+//        transaction = await crowdsale.connect(user1).buyTokens(amount, { value: ether(10) })
+//        result = await transaction.wait()
+
+      })  
           it('rejects insufficent ETH', async () => {
-          await expect(crowdsale.connect(user1).buyTokens(tokens(10), { value: 0 })).to.be.reverted
+            await expect(crowdsale.connect(user1).buyTokens(amount, { value: ether(5) })).to.be.reverted
           })
           it('rejects investor if not whitelisted', async () => {
-          await expect(crowdsale.connect(user2).buyTokens(tokens(10), { value: 10 })).to.be.reverted
+            await expect(crowdsale.connect(user2).buyTokens(amount, { value: ether(10) })).to.be.reverted
           })
+          it('rejects minimum purchase requirement', async () => {   
+            await expect(crowdsale.connect(user1).buyTokens(tokens(1), { value: ether(1) })).to.be.reverted
+          })
+          it('rejects maximum purchase limit', async () => {   
+            await expect(crowdsale.connect(user1).buyTokens(tokens(5), { value: ether(20) })).to.be.reverted
+          })           
 
-        })
+
+      })
   })
 
   describe('Sending ETH', () => {

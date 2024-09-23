@@ -57,6 +57,13 @@ contract Crowdsale {
         _;
     }
 
+/*    modifier validPurchaseAmount () {
+
+        require(_amount >= minPurchase, "Purchase amount is below minimum limit");
+        require(_amount <= maxPurchase, "Purchase amount exceeds maximum limit");
+        _;
+}*/
+
     receive() external payable {
         uint256 amount = msg.value / price;
         buyTokens(amount * 1e18);
@@ -71,10 +78,12 @@ contract Crowdsale {
         payable
         isWhitelisted
         crowdsaleStatus {
+
+            require(_amount >= minPurchase, "Insufficient Purchased");
+            require(_amount <= maxPurchase, "Exceeded max Purchase Limit");         
             require(msg.value == (_amount / 1e18) * price);
             require(token.balanceOf(address(this)) >= _amount);
             require(token.transfer(msg.sender, _amount));
-
             tokenSold += _amount;
 
         emit Buy(_amount, msg.sender);

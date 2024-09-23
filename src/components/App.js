@@ -23,11 +23,16 @@ function App() {
 	const [accountBalance, setAccountBalance] = useState(null)
 
 	const [price, setPrice] = useState(0)
+	const [minPurchase, setMinPurchase] = useState(0)
+	const [maxPurchase, setMaxPurchase] = useState(0)
+
 	const [maxTokens, setMaxTokens] = useState(0)
 	const [tokenSold, setTokenSold] = useState(0)
 
 
 	const [isLoading, setIsLoading] = useState(true);
+
+	const [isWhiteListed, setIswhitelisted] = useState(null);
 
 	const LoadBlockchainData = async () => {
 
@@ -48,15 +53,26 @@ function App() {
 		setAccountBalance(accountBalance)
 
 
-
 		const price = ethers.utils.formatUnits(await crowdsale.price(), 18)
 		setPrice(price)
+
+// Fetch the minPurchase value from the contract
+        const minPurchase = ethers.utils.formatUnits(await crowdsale.minPurchase(), 18)
+        setMinPurchase(minPurchase);
+
+        const maxPurchase = ethers.utils.formatUnits(await crowdsale.maxPurchase(), 18)
+        setMaxPurchase(maxPurchase);
 
 		const maxTokens = ethers.utils.formatUnits(await crowdsale.maxTokens(), 18) 
 		setMaxTokens(maxTokens)
 
 		const tokenSold = ethers.utils.formatUnits(await crowdsale.tokenSold(), 18) 
 		setTokenSold(tokenSold)
+
+	/*	const whiteListed = await crowdsale.whitelist[account]
+		console.log(whiteListed)
+		setIswhitelisted(whiteListed)
+*/
 
 		setIsLoading(false)
 
@@ -83,7 +99,9 @@ function App() {
 
 
 			<>
-			<p className='text-center'><strong>Current Price:</strong> {price} ETH</p>
+			<p className='text-center'><strong>Current Price:</strong> {price} ETH </p>
+			<p className='text-center'><strong>Min Purchase:</strong>{minPurchase}</p>
+			<p className='text-center'><strong>Max Purchase:</strong>{maxPurchase}</p>
 			<Buy provider={provider} price={price} crowdsale={crowdsale} setIsLoading={setIsLoading} />
 			<Progress maxTokens={maxTokens} tokenSold={tokenSold}/>
 			</>
@@ -92,7 +110,7 @@ function App() {
 
 			<hr />
 			{account && (
-				<Info account={account} accountBalance={accountBalance} />
+				<Info account={account} accountBalance={accountBalance}/>
 				)}
 			
 		</Container>
