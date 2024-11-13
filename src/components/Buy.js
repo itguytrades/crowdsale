@@ -36,7 +36,7 @@ const Buy = ({ provider, price, crowdsale, setIsLoading}) => {
 		<Form onSubmit={buyHandler} style={{ maxWidth: '800px', margin: '50px auto' }}>
 			<Form.Group as={Row}>
 				<Col>
-					<Form.Control type="number" placeholder="Enter amount" onChange={(e) => setAmount(e.target.value)}/>
+					<Form.Control type="number" placeholder="Enter amount in CGD" onChange={(e) => setAmount(e.target.value)}/>
 
 				</Col>
 				<Col className='text-center'>

@@ -91,12 +91,11 @@ function App() {
 		<Container>
 			<Navigation />
 
-			<h1 className='my-4 text-center'>Introducing DApp Token!</h1>
+			<h1 className='my-4 text-center'>Get your CGDev Token Now</h1>
 
 			{isLoading ? (
 				<Loading />
 				) : (
-
 
 			<>
 			<p className='text-center'><strong>Current Price:</strong> {price} ETH </p>
@@ -104,8 +103,7 @@ function App() {
 			<p className='text-center'><strong>Max Purchase:</strong>{maxPurchase}</p>
 			<Buy provider={provider} price={price} crowdsale={crowdsale} setIsLoading={setIsLoading} />
 			<Progress maxTokens={maxTokens} tokenSold={tokenSold}/>
-			</>
-			
+			</>			
 				)}
 
 			<hr />

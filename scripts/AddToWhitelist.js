@@ -20,9 +20,7 @@ async function main() {
   const crowdsale = await ethers.getContractAt('Crowdsale', config[chainId].crowdsale.address)
 
     transaction = await crowdsale.connect(deployer).addToWhitelist(user1.address, true)
-    await transaction.wait()       
-  
-    const hasAdded await crowdsale 
+    await transaction.wait()
 
     console.log(`Investor ${user1.address} added to whitelist: \n`)
 
