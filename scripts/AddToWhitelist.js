@@ -22,6 +22,8 @@ async function main() {
     transaction = await crowdsale.connect(deployer).addToWhitelist(user1.address, true)
     await transaction.wait()       
   
+    const hasAdded await crowdsale 
+
     console.log(`Investor ${user1.address} added to whitelist: \n`)
 
 }
