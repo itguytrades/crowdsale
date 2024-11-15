@@ -4,7 +4,8 @@ import logo from '../CGDev.png';
 
 const Navigation = () => {
     return (
-        <Navbar className='my-3'>
+//        <Navbar className='my-3'>
+          <Navbar className="my-3 bg-light" variant="light">
             <img
                 alt="logo"
                 src={logo}
