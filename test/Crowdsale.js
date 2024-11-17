@@ -21,7 +21,20 @@ describe('Crowdsale', () => {
       deployer = accounts[0]
       user1 = accounts[1]
 
-	  crowdsale = await Crowdsale.deploy(token.address, ether(1), '1000000')
+      const startTime = Math.floor(Date.now() / 1000); // Crowdsale starts in 60 seconds
+			const endTime = startTime + 3600; // Crowdsale ends 1 hour later
+			const minPurchase = tokens(1); // Minimum purchase of 1 token
+			const maxPurchase = tokens(100); // Maximum purchase of 100 tokens
+
+			crowdsale = await Crowdsale.deploy(
+		    token.address, 
+		    ether(1), 
+		    '1000000', 
+		    startTime, 
+		    endTime, 
+		    minPurchase, 
+		    maxPurchase
+			);
 
 	  let transaction = await token.connect(deployer).transfer(crowdsale.address, tokens(1000000))
       await transaction.wait()
@@ -48,8 +61,12 @@ describe('Crowdsale', () => {
 		describe('Success', () => {
 
 		  beforeEach(async () => {
+
+		  	transaction = await crowdsale.connect(deployer).addToWhitelist(user1.address, true)
+        await transaction.wait()
+
 		    transaction = await crowdsale.connect(user1).buyTokens(amount, { value: ether(10) })
-	        result = await transaction.wait()
+	      result = await transaction.wait()
 		  })
 			it('transfers tokens', async () => {
 		        expect(await token.balanceOf(crowdsale.address)).to.equal(tokens(999990))
@@ -71,6 +88,10 @@ describe('Crowdsale', () => {
 
 		describe('Failure', () => {
 	        it('rejects insufficent ETH', async () => {
+
+	        transaction = await crowdsale.connect(deployer).addToWhitelist(user1.address, true)
+          await transaction.wait()
+
 	        await expect(crowdsale.connect(user1).buyTokens(tokens(10), { value: 0 })).to.be.reverted
 	        })
 
@@ -84,6 +105,10 @@ describe('Crowdsale', () => {
 	    describe('Success', () => {
 
 	      beforeEach(async () => {
+
+	        transaction = await crowdsale.connect(deployer).addToWhitelist(user1.address, true)
+          await transaction.wait()
+
 	        transaction = await user1.sendTransaction({ to: crowdsale.address, value: amount })
 	        result = await transaction.wait()
 	      })
@@ -122,6 +147,43 @@ describe('Crowdsale', () => {
    		})
 	})
 
+	describe('Updating Purchase Limits', () => {
+    let transaction, result
+    const newMinPurchase = tokens(5)
+    const newMaxPurchase = tokens(50)
+
+    describe('Success', () => {
+        beforeEach(async () => {
+            // Update minPurchase
+            transaction = await crowdsale.connect(deployer).setMinPurchase(newMinPurchase)
+            result = await transaction.wait()
+
+            // Update maxPurchase
+            transaction = await crowdsale.connect(deployer).setMaxPurchase(newMaxPurchase)
+            result = await transaction.wait()
+        })
+
+        it('updates the minPurchase limit', async () => {
+            expect(await crowdsale.minPurchase()).to.equal(newMinPurchase)
+        })
+
+        it('updates the maxPurchase limit', async () => {
+            expect(await crowdsale.maxPurchase()).to.equal(newMaxPurchase)
+        })
+    })
+
+    describe('Failure', () => {
+        it('prevents non-owner from updating minPurchase', async () => {
+            await expect(crowdsale.connect(user1).setMinPurchase(newMinPurchase)).to.be.reverted
+        })
+
+        it('prevents non-owner from updating maxPurchase', async () => {
+            await expect(crowdsale.connect(user1).setMaxPurchase(newMaxPurchase)).to.be.reverted
+        })
+    })
+  })
+
+
 	describe('Finalzing Sale', () => {
 	    let transaction, result
 	    let amount = tokens(10)
@@ -130,6 +192,10 @@ describe('Crowdsale', () => {
 	    describe('Success', () => {
 
 	      beforeEach(async () => {
+
+	        transaction = await crowdsale.connect(deployer).addToWhitelist(user1.address, true)
+          await transaction.wait()
+	      	
 	        transaction = await crowdsale.connect(user1).buyTokens(amount, { value: value })
 	        result = await transaction.wait()
 

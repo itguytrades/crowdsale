@@ -7,13 +7,13 @@ async function main() {
   const MAX_SUPPLY = '1000000'
   const PRICE = ethers.utils.parseUnits('0.025', 'ether')
 
-  const minPurchase = ethers.utils.parseEther('2', 'ether'); // Minimum purchase is 0.1 ETH
+  const minPurchase = ethers.utils.parseEther('1', 'ether'); // Minimum purchase is 0.1 ETH
   const maxPurchase = ethers.utils.parseEther('10', 'ether');  // Maximum purchase is 10 ETH
   let startTime, endTime;
 
-
+  const sixMonthsInSeconds = 6 * 30 * 24 * 60 * 60; 
   startTime = Math.floor(Date.now() / 1000); // Crowdsale starts in 1 minute
-  endTime = startTime + 3600; // Crowdsale lasts for 1 hour
+  endTime = startTime + sixMonthsInSeconds; // Crowdsale lasts for 6 months
 
   // Deploy Token
   const Token = await hre.ethers.getContractFactory('Token')

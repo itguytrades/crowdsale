@@ -16,103 +16,96 @@ import config from '../config.json'
 
 function App() {
 
-	const [provider, setProvider] = useState(null);
-	const [crowdsale, setCrowdsale] = useState(null);
+    const [provider, setProvider] = useState(null);
+    const [crowdsale, setCrowdsale] = useState(null);
+	
+    const [account, setAccount] = useState(null);
+    const [accountBalance, setAccountBalance] = useState(null)
 
-	const [account, setAccount] = useState(null);
-	const [accountBalance, setAccountBalance] = useState(null)
+    const [price, setPrice] = useState(0)
+    const [minPurchase, setMinPurchase] = useState(0)
+    const [maxPurchase, setMaxPurchase] = useState(0)
 
-	const [price, setPrice] = useState(0)
-	const [minPurchase, setMinPurchase] = useState(0)
-	const [maxPurchase, setMaxPurchase] = useState(0)
+    const [maxTokens, setMaxTokens] = useState(0)
+    const [tokenSold, setTokenSold] = useState(0)
 
-	const [maxTokens, setMaxTokens] = useState(0)
-	const [tokenSold, setTokenSold] = useState(0)
+    const [isLoading, setIsLoading] = useState(true);
 
+    const [isWhiteListed, setIswhitelisted] = useState(null);
 
-	const [isLoading, setIsLoading] = useState(true);
+    const LoadBlockchainData = async () => {
 
-	const [isWhiteListed, setIswhitelisted] = useState(null);
+	const provider = new ethers.providers.Web3Provider(window.ethereum)
+	setProvider(provider)
 
-	const LoadBlockchainData = async () => {
+	const token = new ethers.Contract(config[31337].token.address, TOKEN_ABI, provider)
+	const crowdsale = new ethers.Contract(config[31337].crowdsale.address, CROWDSALE_ABI, provider)
+	setCrowdsale(crowdsale)
 
-		const provider = new ethers.providers.Web3Provider(window.ethereum)
-		setProvider(provider)
+	console.log(token)
 
-		const token = new ethers.Contract(config[31337].token.address, TOKEN_ABI, provider)
-		const crowdsale = new ethers.Contract(config[31337].crowdsale.address, CROWDSALE_ABI, provider)
-		setCrowdsale(crowdsale)
+	const accounts = await window.ethereum.request({ method: 'eth_requestAccounts'})
+	const account = ethers.utils.getAddress(accounts[0])
 
-		const accounts = await window.ethereum.request({ method: 'eth_requestAccounts'})
-		const account = ethers.utils.getAddress(accounts[0])
+	setAccount(account)
 
-		setAccount(account)
-//		console.log(account)
-
-		const accountBalance = ethers.utils.formatUnits(await token.balanceOf(account), 18)
-		setAccountBalance(accountBalance)
+	const accountBalance = ethers.utils.formatUnits(await token.balanceOf(account), 18)
+	setAccountBalance(accountBalance)
 
 
-		const price = ethers.utils.formatUnits(await crowdsale.price(), 18)
-		setPrice(price)
+	const price = ethers.utils.formatUnits(await crowdsale.price(), 18)
+	setPrice(price)
 
-// Fetch the minPurchase value from the contract
-        const minPurchase = ethers.utils.formatUnits(await crowdsale.minPurchase(), 18)
-        setMinPurchase(minPurchase);
+	// Fetch the minPurchase value from the contract
+	const minPurchase = ethers.utils.formatUnits(await crowdsale.minPurchase(), 18)
+	setMinPurchase(minPurchase);
 
-        const maxPurchase = ethers.utils.formatUnits(await crowdsale.maxPurchase(), 18)
-        setMaxPurchase(maxPurchase);
+	const maxPurchase = ethers.utils.formatUnits(await crowdsale.maxPurchase(), 18)
+	setMaxPurchase(maxPurchase);
 
-		const maxTokens = ethers.utils.formatUnits(await crowdsale.maxTokens(), 18) 
-		setMaxTokens(maxTokens)
+	const maxTokens = ethers.utils.formatUnits(await crowdsale.maxTokens(), 18) 
+	setMaxTokens(maxTokens)
 
-		const tokenSold = ethers.utils.formatUnits(await crowdsale.tokenSold(), 18) 
-		setTokenSold(tokenSold)
+	const tokenSold = ethers.utils.formatUnits(await crowdsale.tokenSold(), 18) 
+	setTokenSold(tokenSold)
 
-	/*	const whiteListed = await crowdsale.whitelist[account]
-		console.log(whiteListed)
-		setIswhitelisted(whiteListed)
-*/
+	setIsLoading(false)
 
-		setIsLoading(false)
+}
+
+useEffect(() => {
+	if (isLoading) {
+LoadBlockchainData()
 
 	}
 
-	useEffect(() => {
-		if (isLoading) {
-	LoadBlockchainData()
-
-		}
-
-	}, [isLoading]);
+}, [isLoading]);
 
 
-	return(
-		<Container>
-			<Navigation />
+return(
+    <Container>
+	<Navigation />
 
-			<h1 className='my-4 text-center'>Get your CGDev Token Now</h1>
+	    <h1 className='my-4 text-center'>Get your CGDev Token Now</h1>
+		{isLoading ? (
+			<Loading />
+			) : (
+		<>
+		<p className='text-center'><strong>Current Price:</strong> {price} ETH </p>
+		<p className='text-center'><strong>Min Purchase:</strong>{minPurchase}</p>
+		<p className='text-center'><strong>Max Purchase:</strong>{maxPurchase}</p>
+		<Buy provider={provider} price={price} crowdsale={crowdsale} setIsLoading={setIsLoading} />
+		<Progress maxTokens={maxTokens} tokenSold={tokenSold}/>
+		</>			
+		)}
 
-			{isLoading ? (
-				<Loading />
-				) : (
-
-			<>
-			<p className='text-center'><strong>Current Price:</strong> {price} ETH </p>
-			<p className='text-center'><strong>Min Purchase:</strong>{minPurchase}</p>
-			<p className='text-center'><strong>Max Purchase:</strong>{maxPurchase}</p>
-			<Buy provider={provider} price={price} crowdsale={crowdsale} setIsLoading={setIsLoading} />
-			<Progress maxTokens={maxTokens} tokenSold={tokenSold}/>
-			</>			
-				)}
-
-			<hr />
-			{account && (
-				<Info account={account} accountBalance={accountBalance}/>
-				)}
-			
-		</Container>
-	)
+		<hr />
+		{account && (
+			<Info account={account} accountBalance={accountBalance}/>
+			)}
+		
+    </Container>
+)
 
 }
 

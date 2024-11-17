@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
 import "./Token.sol";
@@ -14,7 +14,6 @@ contract Crowdsale {
 
     uint256 public startTime;
     uint256 public endTime;
-
 
     uint256 public minPurchase;
     uint256 public maxPurchase;
@@ -39,7 +38,6 @@ contract Crowdsale {
         endTime = _endTime;
         minPurchase = _minPurchase;
         maxPurchase = _maxPurchase;
-
     }
 
     modifier isWhitelisted() {
@@ -56,13 +54,6 @@ contract Crowdsale {
         require(msg.sender == owner, "Caller is not the owner");
         _;
     }
-
-/*    modifier validPurchaseAmount () {
-
-        require(_amount >= minPurchase, "Purchase amount is below minimum limit");
-        require(_amount <= maxPurchase, "Purchase amount exceeds maximum limit");
-        _;
-}*/
 
     receive() external payable {
         uint256 amount = msg.value / price;
@@ -93,8 +84,16 @@ contract Crowdsale {
         price = _price;
     }
 
-       // Finalize Sale
-    function finalize() public onlyOwner{
+    function setMinPurchase(uint256 _minPurchase) public onlyOwner {
+        minPurchase = _minPurchase;
+    }
+
+    function setMaxPurchase(uint256 _maxPurchase) public onlyOwner {
+        maxPurchase = _maxPurchase;
+    }
+
+    // Finalize Sale
+    function finalize() public onlyOwner {
         require(token.transfer(owner, token.balanceOf(address(this))));
 
         uint256 value = address(this).balance;
