@@ -1,11 +1,20 @@
 const hre = require("hardhat");
 const config = require('../src/config.json')
 
+
+
+const tokens = (n) => {
+  return ethers.utils.parseUnits(n.toString(), 'ether')
+}
+
 async function main() {
  
 
   accounts = await ethers.getSigners()
   deployer = accounts[0]
+  const newPrice = ethers.utils.parseUnits('0.025', 'ether')
+
+
 
    // Fetch network
 
@@ -16,15 +25,14 @@ async function main() {
   // Fetch Crowdsale Contract
   const crowdsale = await ethers.getContractAt('Crowdsale', config[chainId].crowdsale.address)
 
-    transaction = await crowdsale.connect(deployer).addToWhitelist(user1.address, true)
-    await transaction.wait()
+    // Update minPurchase
+    transaction = await crowdsale.connect(deployer).setPrice(newPrice)
+    result = await transaction.wait()
 
-    console.log(`Investor ${user1.address} added to whitelist: \n`)
+    console.log(`CGD price set to ${newPrice}\n`)
 
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
